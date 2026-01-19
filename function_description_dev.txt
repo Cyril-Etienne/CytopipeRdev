@@ -1,11 +1,3 @@
-TRANSFERER SUR ASANA
-
-
-methods::setClass("Clustering",
-
-Description de à quoi ça sert 
-
-
 FONCTIONS A TESTER
 
 dans 2_FCS_Markers_CYTdata.R : 
