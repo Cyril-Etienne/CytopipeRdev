@@ -518,7 +518,7 @@ renameMarkers <- function(CYTdata, from=NULL, to=NULL, removeConjugate=FALSE, se
 #' @description This function aims to remove duplicated marker columns by checking whther marker expression is identicial across any pair of columns. 
 #'
 #' @param CYTdata a S4 object of class 'CYTdata'
-#' @param markers a chracter vector specifying a the name of the markers to test for duplication. If NULL, all markers will be tested. 
+#' @param markers a character vector specifying a the name of the markers to test for duplication. If NULL, all markers will be tested. 
 #'
 #' @return a S4 object of class 'CYTdata'
 #'
