@@ -2,7 +2,8 @@
 #'
 #' @param CYTdata a S4 object of class 'CYTdata'
 #' @param importedMetaclusteringObject a S4 object of class 'Metaclustering' to put in CYTdata object
-#' @param checkOverwrite a boolean value indicating whether to check if a Metaclustering has already been performed on the CYTdata object. If TRUE, it will check and ask for confirmation, if FALSE, any previous clustering will be overwritten by default. 
+#' @param checkOverwrite a boolean value indicating whether to check if a Metaclustering has already been performed on the CYTdata object. 
+#' If TRUE, it will check and ask for confirmation, if FALSE, any previous clustering will be overwritten by default. 
 #' @param val a boolean value. If TRUE, performs validation of the CYTdata object (makeValid function) after importing the Metaclustering. 
 #' @return a S4 object of class 'CYTdata'
 #'
