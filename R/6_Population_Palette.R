@@ -242,17 +242,279 @@ changeLevel <- function(CYTdata,
 }
 
 
+#' @title Get the names of the clusters belonging to each metacluster. 
+#'
+#' @param CYTdata a S4 object of class 'CYTdata'
+#' @param format a string specifying the returned data's format. Possible values are "list" (default) and "data.frame"
+#'
+#' @return a list or dataframe indicating the clusters associated with each metacluster
+#'
+#' @export
+#'
+
+getMetaclustersMembership <- function(CYTdata, format = c("list", "data.frame")){
+  
+  if (class(CYTdata)!="CYTdata") { stop("Error : argument 'CYTdata' a S4 object of class 'CYTdata'.") }
+  else { CYTdata = MakeValid(CYTdata, verbose = TRUE) }
+  
+  format = match.arg(format)
+  checkmate::qassert(format, "S1")
+  
+  if (length(CYTdata@Metaclustering@metaclusters)==0 || length(CYTdata@Clustering@clusters)==0) {
+    stop()
+  }
+  
+  if (format=="list") {
+    res = as.list(sapply(levels(CYTdata@Metaclustering@metaclusters),
+                         FUN = function(mc){ return(unique(CYTdata@Clustering@clusters[CYTdata@Metaclustering@metaclusters==mc])) }))
+    names(res) = levels(CYTdata@Metaclustering@metaclusters)
+    return(res)
+  }
+  else {
+    res = sapply(levels(CYTdata@Clustering@clusters),
+                 FUN = function(cl){ return(unique(CYTdata@Metaclustering@metaclusters[CYTdata@Clustering@clusters==cl])) })
+    res = data.frame("clusters" = levels(CYTdata@Clustering@clusters),
+                     "metaclusters" = res)
+    return(res)
+  }
+  
+}
 
 
+#' @title Change color palette associated with clusters/metaclusters
+#'
+#' @description This function aims to change the color palette associated with a specific set of clusters or metaclusters
+#'
+#' @param CYTdata a S4 object of class 'CYTdata'
+#' @param level a character value indicating whether to change palette on clusters or metaclusters. Possible values are: "clusters", "metaclusters". By default, 'clusters' are used.
+#' @param population a character vector containing the identifiers of the population(s) (clusters or metaclusters) for which to change the color. If NULL, (default) all clusters/metaclusters are used
+#' @param autoColor logical. Whether to generate a color palette automatically (TRUE), or provide a custom one (FALSE)
+#' @param autoColorType character string specifying the type of color palette to generate if autoColor is set to TRUE. Possible values are "rainbow" (default) and "blank", which will set all colors to white (#FFFFFF)
+#' @param homemadePalette a named character vector containing the colors (hexadecimal code, or name) to be associated with each cluster/metacluster in population. Necessary if autoColor = FALSE. 
+#'
+#' @return a S4 object of class 'CYTdata'
+#'
+#'@export
+#'
+
+changePalettes <- function(CYTdata,
+                           level = c("clusters", "metaclusters"),
+                           autoColor = TRUE,
+                           population = NULL,
+                           autoColorType = c("rainbow","blank"),
+                           homemadePalette = NULL) {
+  
+  if (class(CYTdata)!="CYTdata") { stop("Error : argument 'CYTdata' a S4 object of class 'CYTdata'.") }
+  #else { CYTdata = MakeValid(CYTdata, verbose = TRUE) }
+  
+  level = match.arg(level)
+  checkmate::qassert(level, "S1")
+  checkmate::qassert(autoColor, "B1")
+  
+  if (!level %in%c("clusters", "metaclusters")) {
+    stop("Error : 'level' argument must be either 'clusters' or 'metaclusters'")
+  }
+  if (level == "clusters") {
+    popId = CYTdata@Clustering@clusters
+    if (length(popId)==0) {
+      stop("Error : 'level' argument require clustering step to be performed (Clustering@clusters slot is empty).")
+    }
+  }
+  else {
+    popId = CYTdata@Metaclustering@metaclusters
+    if (length(popId)==0) {
+      stop("Error : 'level' argument require metaclustering step to be performed (Metaclustering@metaclusters slot is empty).")
+    }
+  }
+  
+  if (autoColor) {
+    autoColorType = match.arg(autoColorType)
+    checkmate::qassert(autoColorType, "S1")
+    population = checkorderPopulation(CYTdata, population = population, level = level, order = TRUE, checkDuplicates = TRUE)
+    if (autoColorType=="blank") {
+      if (level=="clusters") { CYTdata@Clustering@palette[population] = rep("#FFFFFF", length(population)) }
+      else { CYTdata@Metaclustering@palette[population] = rep("#FFFFFF", length(population)) }
+    }
+    else {
+      if (level=="clusters") { CYTdata@Clustering@palette[population] = rainbow(length(population)) }
+      else { CYTdata@Metaclustering@palette[population] = rainbow(length(population)) }
+    }
+  }
+  else {
+    if (is.null(homemadePalette)) { stop("Error : 'autoColor' argument is set to FALSE but no 'homemadePalette' is given") }
+    checkmate::qassert(homemadePalette, "S*")
+    
+    if(!all(areColors(homemadePalette))){
+      stop("Error : 'homemadePalette' argument does not contain only hexadecimal color.)")
+    }
+    population = names(homemadePalette)
+    if(sum(is.na(population))>0) {
+      stop("Error : 'homemadePalette' argument's names contain NA values.
+         It must be a fully named vector of hexadecimal color.
+         Associated ", level, " names are missing for colors : ",
+           paste0(homemadePalette[is.na(population)], collapse=","), ".")
+    }
+    populationdup = population[duplicated(population)]
+    if (length(populationdup)>0) {
+      stop("Error : 'homemadePalette' argument's names contain duplicated values (",
+           paste0(populationdup, collapse = ", "),
+           "). Names must be vector of unique ", level, " levels.")
+    }
+    
+    if (level == "clusters") { CYTdata@Clustering@palette[population] = homemadePalette[population] }
+    else { CYTdata@Metaclustering@palette[population] = homemadePalette[population] }
+    
+    popErr = setdiff(population, levels(popId))
+    if (length(popErr)>0) {
+      stop("Error : 'homemadePalette' argument's names providing identifiers not present in ",
+           level, " vector (", paste0(popErr, collapse=", "), ").")
+    }
+  }
+  
+  nochangePop = setdiff(levels(popId),population)
+  if(length(nochangePop)>0){
+    cat("\n\n - The following ", level, " :", paste0(nochangePop, collapse=", "), " kept the same colors.")
+    cat("\n\n - The following ", level, " :", paste0(population, collapse=", "), " changed colors.")
+  }
+  else { cat("\n\n - All the ", level, " changed colors.") }
+  
+  validObject(CYTdata)
+  return(CYTdata)
+}
+
+#' @title Give clusters the same color as metaclusters
+#'
+#' @description This function  changes the color of the clusters to match that of their respective metaclusters. 
+#'
+#' @param CYTdata a S4 object of class 'CYTdata'
+#' @param population a character vector containing the identifiers of the clusters for which to change the color. If NULL, (default) all clusters are used
+#' @param addVariation logical. If TRUE, some brightness adjustments will be made to the metacluster colors to be able to distinguish the clusters while still retaining the hue of the metacluster. Defaults to FALSE.
+#'
+#' @return a S4 object of class 'CYTdata'
+#'
+#'@export
+#'
+
+heritatePalette <- function(CYTdata, population = NULL, addVariation = FALSE) {
+  
+  if (class(CYTdata)!="CYTdata") { stop("Error : argument 'CYTdata' a S4 object of class 'CYTdata'.") }
+  else { CYTdata = MakeValid(CYTdata, verbose = TRUE) }
+  
+  checkmate::qassert(addVariation, "B1")
+  
+  popId = CYTdata@Metaclustering@metaclusters
+  if (length(CYTdata@Metaclustering@metaclusters)==0) {
+    stop("Error : 'heritatePalette' function require metaclustering step to be performed (Metaclustering@metaclusters slot is empty).")
+  }
+  if (length(CYTdata@Clustering@clusters)==0) {
+    stop("Error : 'heritatePalette' function require clustering step to be performed (Clustering@clusters slot is empty).")
+  }
+  palette = CYTdata@Clustering@palette
+  
+  metaclusters = checkorderPopulation(CYTdata, level = "metaclusters", order = TRUE, checkDuplicates = TRUE, population = population)
+  for (mc in metaclusters) {
+    cls = unique(CYTdata@Clustering@clusters[CYTdata@Metaclustering@metaclusters == mc])
+    color = CYTdata@Metaclustering@palette[mc]
+    n = length(cls)
+    if (addVariation) {
+      colors = grDevices::colorRampPalette(c(as.character(shades::brightness(color, max(0.4, 0.9-0.5*n/20))),
+                                             as.character(shades::brightness(color, min(1.4, 0.9+0.5*n/20)))))(n)
+    }
+    else { colors = rep(color, n) }
+    palette[cls] = colors
+  }
+  
+  CYTdata@Clustering@palette = palette
+  validObject(CYTdata)
+  return(CYTdata)
+}
 
 
+#' @title Display the color palette associated with clusters or metaclusters as a plot
+#'
+#' @param CYTdata a S4 object of class 'CYTdata'
+#' @param level a character value indicating whether to display clusters or metaclusters. Possible values are: "clusters" (default), "metaclusters".
+#' @param population a character vector containing the identifiers of the clusters/metaclusters to display
+#' @param ncol integer, number of columns in the graph. Defaults to one per 10 clusters/metaclusters
+#' @param labelsize numeric, size of the population labels. Defaults to 5.  
+#'
+#' @return nothing, but displays a plot. 
+#'
+#' @export
+#'
+#'
+
+showPalettes <- function(CYTdata,
+                         level = c("clusters", "metaclusters"),
+                         population = NULL,
+                         ncol = NULL,
+                         labelSize = 5) {
+  
+  if (class(CYTdata)!="CYTdata") { stop("Error : argument 'CYTdata' a S4 object of class 'CYTdata'.") }
+  else { CYTdata = MakeValid(CYTdata, verbose = TRUE) }
+  
+  level = match.arg(level)
+  checkmate::qassert(level, "S1")
+  checkmate::qassert(labelSize, "N1")
+  checkmate::qassert(ncol, c(0,"N1"))
+  if (labelSize<1) { stop("Error : argument 'labelSize' must be positive integer") }
+  if (!is.null(ncol) && ncol<1) { stop("Error : argument 'ncol' must be positive integer") }
+  population = checkorderPopulation(CYTdata, population = population, level = level, order = TRUE, checkDuplicates = TRUE) # Error messages
+  
+  print(population)
+  if (is.null(ncol)) { ncol = length(population)%/%10 }
+  if (level == "clusters"){ palette = CYTdata@Clustering@palette }
+  else { palette = CYTdata@Metaclustering@palette }
+  
+  Q = length(population)%/%ncol
+  R = length(population)%%ncol
+  print(Q)
+  X = rep(1:ncol, Q)
+  Y = rep(1:Q, each=ncol)
+  if (R!=0) {
+    X = c(X, 1:R)
+    Y = c(Y, rep(Q+1,R))
+  }
+  
+  data = data.frame("pop" = names(palette),
+                    "X" = X,
+                    "Y" = Y)
+  plot <- ggplot2::ggplot(data, mapping=ggplot2::aes(X, Y, fill= pop)) +
+    ggplot2::geom_tile() +
+    ggplot2::scale_fill_manual(values = palette) +
+    ggplot2::geom_label(ggplot2::aes(X, Y, label= pop), fill = "white", size = labelSize) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5),
+                   axis.title = ggplot2::element_blank(),
+                   axis.text = ggplot2::element_blank(),
+                   axis.ticks = ggplot2::element_blank(),
+                   axis.line = ggplot2::element_blank(),
+                   panel.grid.major = ggplot2::element_blank(),
+                   panel.grid.minor = ggplot2::element_blank(),
+                   panel.background = ggplot2::element_blank(),
+                   panel.border = ggplot2::element_blank(),
+                   legend.position = "none")
+  
+  plot(plot)
+}
 
 
+#' @title Internal - check if characters in a vector are valid colors
+#'
+#' @param x a character vector of color names
+#'
+#' @return a logical vector
+#'
+#' @export
+#'
+#'
 
-
-
-
-
+areColors <- function(x) {
+  sapply(x, function(X) {
+    tryCatch(is.matrix(col2rgb(X)),
+             error = function(e) FALSE)
+  })
+}
 
 
 
