@@ -76,6 +76,7 @@ removeDimReduction <- function(CYTdata) {
 #' - LargeVis-like method (lvish), a non-linear dimension reduction technique
 #' The whole set of cell markers or specific cell markers can be used during the dimensionality reduction process.
 #' Note that for PCA, currently only the first two principal components are kept, with no way to check the percentage of variance explained by them. You may want to run the PCA yourself on CYTdata@matrix.expression[,markers] using prcomp while we integrate it better. 
+#' Note also that t-SNE may require check_duplicates = FALSE. 
 #'
 #' @param CYTdata a S4 object of class 'CYTdata'
 #' @param markers a character vector providing the cell markers to use to generate the reduced data
