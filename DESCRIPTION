@@ -1,11 +1,10 @@
-Package: CytopipRdev
+Package: CytopipeRdev
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Analyses for cytometry data
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author: Paul MAZET, Cyril ETIENNE, Aurélien MARC
+Maintainer: Cyril ETIENNE <cyril.etienne@cea.fr>
+Description: To do
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
