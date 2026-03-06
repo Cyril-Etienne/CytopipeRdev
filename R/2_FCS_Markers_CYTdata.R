@@ -140,7 +140,12 @@ createCYTdata <- function(files,
   cat("\n\nCreating CYTdata object..")
   CYTdata <- methods::new("CYTdata",
                           matrix.expression = exprs,
-                          samples = samples)
+                          samples = samples,
+                          
+                          Clustering = Clustering(),
+                          Metaclustering = Metaclustering(),
+                          DimReduction = DimReduction(),
+                          Kinetic = Kinetic())
   
   if (rawData){
     colnames(exprsRaw) = FileMarkers
