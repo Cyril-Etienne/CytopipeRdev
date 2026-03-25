@@ -9,7 +9,8 @@ plotDimRedPopulations(
   population = NULL,
   level = c("clusters", "metaclusters"),
   samples = NULL,
-  printCentroid = TRUE
+  printCentroid = TRUE,
+  axes = c(1, 2)
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ plotDimRedPopulations(
 \item{samples}{a character vector containing the names of the biological samples to plot. Non included samples will still be ploted, but in grey.}
 
 \item{printCentroid}{a boolean. If TRUE (default), displays the name of each population at that population's centroid position.}
+
+\item{axes}{a numeric of length 2 indicating the axes to display. Defaults to 1 and 2.}
 }
 \value{
 a ggplot2 object

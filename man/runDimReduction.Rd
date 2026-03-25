@@ -10,6 +10,7 @@ runDimReduction(
   type = c("UMAP", "tSNE", "lvish", "PCA"),
   seed = 42,
   checkOverwrite = TRUE,
+  n_components = 2,
   ...
 )
 }
@@ -23,6 +24,8 @@ runDimReduction(
 \item{seed}{a numeric value providing the random seed to use during stochastic operations}
 
 \item{checkOverwrite}{a boolean, if TRUE (default), will pause and display a warning if a DimReduction is already present in the CYTdata and must be overwritten.}
+
+\item{n_components}{a numeric value providing the number of dimensions to compute for non linear dimension reduction methods, or to keep in the case of PCA. Please note tSNE does not accept more than 3 dimensions.}
 
 \item{...}{additional arguments passed on to method from R package.
 For PCA, please refer to prcomp method from stats package : https://rdrr.io/r/stats/stats-package.html

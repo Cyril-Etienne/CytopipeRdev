@@ -11,7 +11,8 @@ plotDimReduction(
   level = c("clusters", "metaclusters"),
   plotType = c("density", "metadata"),
   title = "Dimensionnality reduction view",
-  metadata = "Timepoint"
+  metadata = "Timepoint",
+  axes = c(1, 2)
 )
 }
 \arguments{
@@ -30,6 +31,8 @@ Possible values are "density" (default, the points are colors according to cell 
 \item{title}{a character value providing the title for the graph. Defaults to "Dimensionnality reduction view"}
 
 \item{metadata}{a character vector containing the type of metadata to study, if plotType = "metadata".}
+
+\item{axes}{a numeric of length 2 indicating the axes to display. Defaults to 1 and 2.}
 }
 \value{
 a ggplot2 object

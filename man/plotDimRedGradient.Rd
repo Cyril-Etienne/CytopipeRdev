@@ -12,7 +12,8 @@ plotDimRedGradient(
   samples = NULL,
   bounds = c(0.05, 0.95),
   relativeGradient = FALSE,
-  paletteGradient = NULL
+  paletteGradient = NULL,
+  axes = c(1, 2)
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ plotDimRedGradient(
 \item{relativeGradient}{a boolean. If TRUE, marker expression will be bound according to the marker's expression in the selected populations and/or samples. If FALSE (default), the entire cell population will be used.}
 
 \item{paletteGradient}{a character vector containing the colors to use for the gradient scale. Defaults to a blue/red gradient.}
+
+\item{axes}{a numeric of length 2 indicating the axes to display. Defaults to 1 and 2.}
 }
 \value{
 a ggplot2 object

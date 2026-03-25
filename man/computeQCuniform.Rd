@@ -44,7 +44,7 @@ By default, all of them are used, but it is recommended to use only the markers 
 
 \item{generateEcdf}{logical. If TRUE, an empirical cumulative distribution is generated with the QC, useful for comparing thGood values. CURRENTLY NON FUNCTIONNAL.}
 
-\item{parallelize}{logical. If TRUE, calculation of the test is done in parallel on several cores. If you get an "impossible to find function "%dopar%" error, try library(foreach)}
+\item{parallelize}{logical. If TRUE, calculation of the test is done in parallel on several cores. If you get an "impossible to find function "%dopar%"" error, try library(foreach)}
 
 \item{nbCores}{an integer. Number of processor cores to use. If NULL, uses one less cores than available to leave computational power for using the computer.}
 }
@@ -63,9 +63,8 @@ a list containing QC uniform features:
 }
 \description{
 This function aims to identify and show cell clusters having a uniform phenotype, defined as an unimodal expression and a narrow range of expression for a selected set of markers
-
- @details
-
+}
+\details{
 - Check unimodal expression: testing unimodal distribution of markers with Hartigan's dip test.
 - Check the range of expression: check if the interquartile range of the specified markers is below a specified threshold.
 }
