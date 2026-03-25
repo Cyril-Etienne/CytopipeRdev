@@ -341,15 +341,13 @@ run_Hierarchical_Metaclustering <- function(CYTdata,
                     population = NULL,
                     level = "clusters",
                     typeMSI = typeMSI,
-                    rescaleBounds = rescaleBounds,
-                    rescaleMetadata = rescaleMetadata)
+                    rescaleBounds = rescaleBounds)
   
   parameters = list("type" = "hierarchical_clustering",
                     "criterion" = criterion,
                     "seed" = seed,
                     "typeMSI" = typeMSI,
-                    "rescaleBounds" = rescaleBounds,
-                    "rescaleMetadata" = rescaleMetadata)
+                    "rescaleBounds" = rescaleBounds)
   
   ### Hclust for clusters : clusters
   dataDist = stats::dist(data)
