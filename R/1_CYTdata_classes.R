@@ -1,3 +1,85 @@
+
+#' @title Clustering class definition
+#'
+#' @description The Clustering object is a S4 object containing all the data concerning the Clustering step performed on a 'CYTdata' object
+#'
+#' @slot clusters a vector containing the identifiers of cell clusters as a factor
+#' @slot cellcount a data.frame containing the number of cells associated to each cluster for each sample
+#' @slot abundance a data.frame containing the percentage of cells associated to each cluster for each sample
+#' @slot palette TO DO
+#' #' @slot optional_parameters TO CHECK a vector containing the parameters used for the identification of the cell clusters (especially the argument of 'run.Clustering' function : seed, markers, architecture, type, etc.)
+#' @slot optional_plots TO DO
+#' 
+#'
+#' @name Clustering-class
+#' @rdname Clustering-class
+#' @exportClass Clustering
+
+Clustering <- methods::setClass("Clustering",
+                                slots = c(clusters = "factor",
+                                          cellcount = "data.frame",
+                                          abundance = "data.frame",
+                                          palette = "vector",
+                                          optional_parameters = "list",
+                                          optional_plots = "list"))
+
+#' @title Metaclustering class definition
+#'
+#' @description The Metaclustering object is a S4 object containing all the data concerning the Metaclustering step performed on a 'CYTdata' object
+#'
+#' @slot metaclusters a vector containing the identifiers of cell metaclusters (phenotypic families) as a factor
+#' @slot cellcount a data.frame containing the number of cells associated to each metacluster for each sample
+#' @slot abundance a data.frame containing the percentage of cells associated to each metacluster for each sample
+#' @slot palette TO DO
+#' @slot optional_HierarchicalHeatmap TO CHECK a list containing all the features about heatmap representing phenotypes of clusters and families
+#' @slot optional_parameters TO CHECK a vector containing the parameters used for the identification of the cell clusters (especially the argument of 'run.Clustering' function : seed, markers, architecture, type, etc.)
+#'
+#' @name Metaclustering-class
+#' @rdname Metaclustering-class
+#' @exportClass Metaclustering
+#'
+
+Metaclustering <- methods::setClass("Metaclustering",
+                                    slots = c(metaclusters = "factor",
+                                              cellcount = "data.frame",
+                                              abundance = "data.frame",
+                                              palette = "vector",
+                                              optional_parameters = "list",
+                                              optional_HierarchicalHeatmap = "list"))
+
+#' @title DimReduction class definition
+#'
+#' @description The DimReduction object is a S4 object containing all the data concerning the DimReduction step performed on a 'CYTdata' object
+#'
+#' @slot coordinates a data.frame containing the coordinates data points in the reduced data space
+#' @slot optional_parameters a list containing the parameters used for DimReduction computation (especially the arguments of 'run.DimReduction' function : seed, markers, type, etc.)
+#'
+#' @name DimReduction-class
+#' @rdname DimReduction-class
+#' @exportClass DimReduction
+#'
+
+DimReduction <- methods::setClass("DimReduction",
+                                  slots = c(coordinates = "data.frame",
+                                            optional_parameters = "list"))
+
+#' @title Kinetic class definition
+#'
+#' @description The Kinetic object is a S4 object containing all the data concerning a kinetic clustering step performed on a 'CYTdata' object
+#'
+#' @slot families a data.frame containing the identifiers of metaclusters kinetic families computed with 'run.Kinetic' function
+#' @slot optional_parameters a list containing the parameters used for kinetic clustering (especially the arguments of 'run.Kinetic' function : N.kinetics, sample.subset, etc.)
+#'
+#' @name Kinetic-class
+#' @rdname Kinetic-class
+#' @exportClass Kinetic
+#'
+
+Kinetic <- methods::setClass("Kinetic",
+                             slots = c(families = "factor",
+                                       optional_parameters = "list"))
+
+
 #' @title CYTdata class definition
 #'
 #' @description The CYTdata object is a S4 object containing all cytometry expressions.
@@ -33,14 +115,29 @@ CYTdata <- methods::setClass("CYTdata",
                                        DiffAbundanceAnalysis = "data.frame",
                                        Kinetic = "Kinetic"),
                              
+                             prototype = list(samples = factor(),
+                                              matrix.expression = data.frame(),
+                                              metadata = data.frame(),
+                                              raw.matrix.expression = data.frame(),
+                                              Clustering = Clustering(),
+                                              Metaclustering = Metaclustering(),
+                                              DimReduction = DimReduction(),
+                                              DiffAbundanceAnalysis = data.frame(),
+                                              Kinetic = Kinetic()),
+                             
                              validity = function(object) {
                                
                                ### Validity of samples, matrix.expression, raw.matrix.expression
                                
-                               ## Check samples vector
+                               
+                               # if (nrow(object@matrix.expression) == 0) {
+                               #   stop("Error in CYTdata object: matrix.expression is empty.")
+                               # }
+                               
+                                ## Check samples vector
                                errLev = setdiff(levels(object@samples), unique(object@samples))
                                if (length(errLev)>0) {
-                                 stop("Error in CYTdata object : : the samples factor vector contains
+                                 stop("Error in CYTdata object : the samples factor vector contains
                                        levels not present in the vector (", paste0(errLev, collapse = ", "), ").
                                        Please drop absent levels using droplevels function.")
                                }
@@ -350,6 +447,10 @@ MakeValid <- function(CYTdata, verbose = TRUE){
   checkmate::qassert(verbose, "B1")
   
   ### Validity of samples, matrix.expression, raw.matrix.expression
+  
+  # if (nrow(CYTdata@matrix.expression) == 0) {
+  #   stop("Error in CYTdata object: matrix.expression is empty.")
+  # }
   
   ## Check samples vector
   errLev = setdiff(levels(CYTdata@samples), unique(CYTdata@samples))
@@ -706,84 +807,4 @@ MakeValid <- function(CYTdata, verbose = TRUE){
 
 
 
-
-#' @title Clustering class definition
-#'
-#' @description The Clustering object is a S4 object containing all the data concerning the Clustering step performed on a 'CYTdata' object
-#'
-#' @slot clusters a vector containing the identifiers of cell clusters as a factor
-#' @slot cellcount a data.frame containing the number of cells associated to each cluster for each sample
-#' @slot abundance a data.frame containing the percentage of cells associated to each cluster for each sample
-#' @slot palette TO DO
-#' #' @slot optional_parameters TO CHECK a vector containing the parameters used for the identification of the cell clusters (especially the argument of 'run.Clustering' function : seed, markers, architecture, type, etc.)
-#' @slot optional_plots TO DO
-#' 
-#'
-#' @name Clustering-class
-#' @rdname Clustering-class
-#' @exportClass Clustering
-
-Clustering <- methods::setClass("Clustering",
-                                slots = c(clusters = "factor",
-                                          cellcount = "data.frame",
-                                          abundance = "data.frame",
-                                          palette = "vector",
-                                          optional_parameters = "list",
-                                          optional_plots = "list"))
-
-#' @title Metaclustering class definition
-#'
-#' @description The Metaclustering object is a S4 object containing all the data concerning the Metaclustering step performed on a 'CYTdata' object
-#'
-#' @slot metaclusters a vector containing the identifiers of cell metaclusters (phenotypic families) as a factor
-#' @slot cellcount a data.frame containing the number of cells associated to each metacluster for each sample
-#' @slot abundance a data.frame containing the percentage of cells associated to each metacluster for each sample
-#' @slot palette TO DO
-#' @slot optional_HierarchicalHeatmap TO CHECK a list containing all the features about heatmap representing phenotypes of clusters and families
-#' @slot optional_parameters TO CHECK a vector containing the parameters used for the identification of the cell clusters (especially the argument of 'run.Clustering' function : seed, markers, architecture, type, etc.)
-#'
-#' @name Metaclustering-class
-#' @rdname Metaclustering-class
-#' @exportClass Metaclustering
-#'
-
-Metaclustering <- methods::setClass("Metaclustering",
-                                    slots = c(metaclusters = "factor",
-                                              cellcount = "data.frame",
-                                              abundance = "data.frame",
-                                              palette = "vector",
-                                              optional_parameters = "list",
-                                              optional_HierarchicalHeatmap = "list"))
-
-#' @title DimReduction class definition
-#'
-#' @description The DimReduction object is a S4 object containing all the data concerning the DimReduction step performed on a 'CYTdata' object
-#'
-#' @slot coordinates a data.frame containing the coordinates data points in the reduced data space
-#' @slot optional_parameters a list containing the parameters used for DimReduction computation (especially the arguments of 'run.DimReduction' function : seed, markers, type, etc.)
-#'
-#' @name DimReduction-class
-#' @rdname DimReduction-class
-#' @exportClass DimReduction
-#'
-
-DimReduction <- methods::setClass("DimReduction",
-                                  slots = c(coordinates = "data.frame",
-                                            optional_parameters = "list"))
-
-#' @title Kinetic class definition
-#'
-#' @description The Kinetic object is a S4 object containing all the data concerning a kinetic clustering step performed on a 'CYTdata' object
-#'
-#' @slot families a data.frame containing the identifiers of metaclusters kinetic families computed with 'run.Kinetic' function
-#' @slot optional_parameters a list containing the parameters used for kinetic clustering (especially the arguments of 'run.Kinetic' function : N.kinetics, sample.subset, etc.)
-#'
-#' @name Kinetic-class
-#' @rdname Kinetic-class
-#' @exportClass Kinetic
-#'
-
-Kinetic <- methods::setClass("Kinetic",
-                             slots = c(families = "factor",
-                                       optional_parameters = "list"))
 
