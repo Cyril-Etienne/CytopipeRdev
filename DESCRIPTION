@@ -1,10 +1,10 @@
 Package: CytopipeRdev
 Type: Package
 Title: Analyses for cytometry data
-Version: 0.1.1
+Version: 0.1.2
 Author: Paul MAZET, Cyril ETIENNE, Aurélien MARC
 Maintainer: Cyril ETIENNE <cyril.etienne@cea.fr>
-Description: To do
+Description: CytopipeR offers simplified functions for the analysis of cytometry datasets, notably clustering of cells, visualization, and differential analysis.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
