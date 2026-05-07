@@ -357,3 +357,72 @@ samplesCellcounts <- function(CYTdata,
   return(plot)
 }
 
+#Author: Cyril ETIENNE
+#Date : 2026-03-27
+
+#' @title Filter cells by metadata and return a boolean
+#'
+#' @description This function returns a boolean vector indicating whether or not each cell in the CYTdata matches a specific metadata condition.
+#' 
+#' @param CYTdata a CYTdata object
+#' @param metadata a character value of length 1 indicating the metadata of interest (e.g., "Timepoint" or "Individual)
+#' @param condition a character vector indicating the condition(s) of interest (e.g., c("Baseline", "Day1", "Day7")). Can be of any length > 0. 
+#'
+#' @return a boolean vector
+#'
+#' @export
+#'
+
+CYTfilterBool = function(CYTdata, metadata, condition) {
+  
+  #Validity of arguments
+  
+  if (class(CYTdata)!="CYTdata") { stop("Error : argument 'CYTdata' a S4 object of class 'CYTdata'.") }
+  else { CYTdata = MakeValid(CYTdata, verbose = TRUE) }
+  
+  if (ncol(CYTdata@metadata)==0) 
+    stop("Error : Missing metadata slot for 'CYTdata' argument.")
+  
+  checkmate::qassert(metadata, "S1")
+  checkmate::qassert(condition, "S+")
+  
+  if (!(metadata %in% colnames(CYTdata@metadata))) 
+    stop("Error : supplied metadata argument (", metadata, ") not found in colnames of CYTdata@metadata.", sep = "")
+  
+  errLev = setdiff(condition, unique(CYTdata@metadata[[metadata]]))
+  if (length(errLev) > 0) 
+    stop("Error : supplied condition argument(s) (", paste(errLev, collapse = ", "), ") not found in ", metadata," column of CYTdata@metadata.", sep = "")
+  
+  #Main code
+  
+  samplesOfInterest = CYTdata@metadata[CYTdata@metadata[[metadata]] %in% condition,]
+  samplesOfInterest = rownames(samplesOfInterest)
+  Bool = CYTdata@samples %in% samplesOfInterest
+  
+  return(Bool)
+  
+}
+
+#Author: Cyril ETIENNE
+#Date : 2026-03-27
+
+#' @title Filter cells by metadata and return indexes
+#'
+#' @description This function returns indexes of cells in a CYTdata object matching a specific metadata condition.
+#' 
+#' @param CYTdata a CYTdata object
+#' @param metadata a character value of length 1 indicating the metadata of interest (e.g., "Timepoint" or "Individual)
+#' @param condition a character vector indicating the condition(s) of interest (e.g., c("Baseline", "Day1", "Day7")). Can be of any length > 0. 
+#'
+#' @return a numerical vector
+#'
+#' @export
+#'
+
+CYTfilterIdx = function(CYTdata, metadata, condition) {
+  
+  idxs = which(CYTfilterBool(CYTdata, metadata, condition))
+  
+  return(idxs)
+  
+}

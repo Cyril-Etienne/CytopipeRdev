@@ -54,16 +54,33 @@ plotDimReduction <- function(CYTdata,
   
   
   if (plotType == "density") {
-    if (!is.null(samples) || !is.null(population)) {
-      stop("Error : 'plotType' argument is set to 'density' and requires the entire dataset to be computed ('samples' and 'population' arguments must both be set to NULL)")
+    
+    #Changed here 07-05-2026
+    
+    colnames(data) = c("x", "y")
+    
+    samples = checkorderSamples(CYTdata, samples, order=TRUE, checkDuplicates=TRUE)
+    colorIndexes = (CYTdata@samples %in% samples)
+    
+    dataGrey = subset(data, !colorIndexes)
+    data = subset(data, colorIndexes)
+    
+    
+    plot = ggplot2::ggplot(data, 
+                           mapping = ggplot2::aes(x,y))
+    
+    if (nrow(dataGrey)>0) {
+      plot = plot +
+        ggplot2::geom_point(data = dataGrey,
+                            ggplot2::aes(x,y),
+                            color = "gray", size = 0.001) +
+        ggnewscale::new_scale_color()
     }
     
-    colnames(data) = c("x", "y") 
-    plot <- ggplot2::ggplot(data, ggplot2::aes(x,y)) +
+    plot <- plot + 
       ggpointdensity::geom_pointdensity(size=0.001) +
       viridis::scale_color_viridis() +
       ggplot2::labs(color = "Cell density")
-    legendPosition = "right"
   }
   else {
     plot <- ggplot2::ggplot()
@@ -103,7 +120,7 @@ plotDimReduction <- function(CYTdata,
                                                 color = "metadata"),
                             size = 0.001) +
         ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(alpha = 1, size = 2), ncol = 1, title = metadata))
-      legendPosition = "right"
+      # legendPosition = "right"
     }
   }
   
